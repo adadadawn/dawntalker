@@ -8,6 +8,7 @@ import shlex
 import platform
 import json
 # 11.24
+# 交互式文件，简单理解前端
 python = sys.executable
 git = os.environ.get('GIT', "git")
 index_url = os.environ.get('INDEX_URL', "")
