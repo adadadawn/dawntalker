@@ -87,15 +87,28 @@ class DenseMotionNetwork(nn.Module):
         sparse_deformed = sparse_deformed.view((bs, self.num_kp+1, -1, d, h, w))                        # (bs, num_kp+1, c, d, h, w)
         return sparse_deformed
 
+
+# 基于给定的关键点生成热图表示
     def create_heatmap_representations(self, feature, kp_driving, kp_source):
+        """
+        feature：这是一个输入张量，表示某种特征。在代码中，使用了这个特征来获取其空间尺寸。
+        kp_driving：这是表示运动驱动关键点的张量。关键点是在图像中标识出的特殊点，用于描述运动或形状变化。
+        kp_source：这是表示源关键点的张量，通常是在静止图像中标识的关键点。
+        """
         spatial_size = feature.shape[3:]
+        # kp2gaussian 该函数的作用是生成高斯热图，其中关键点的影响通过kp_variance进行调节。
         gaussian_driving = kp2gaussian(kp_driving, spatial_size=spatial_size, kp_variance=0.01)
+        # 这行生成了另一个高斯热图，基于kp_source关键点。
         gaussian_source = kp2gaussian(kp_source, spatial_size=spatial_size, kp_variance=0.01)
+        # 这行计算两个高斯热图的差异，生成一个新的热图。
         heatmap = gaussian_driving - gaussian_source
 
         # adding background feature
+        # 创建一个全零的张量，作为背景特征。
         zeros = torch.zeros(heatmap.shape[0], 1, spatial_size[0], spatial_size[1], spatial_size[2]).type(heatmap.type())
+        # 在第一个维度上连接零张量和之前计算的热图，将背景特征添加到热图中。
         heatmap = torch.cat([zeros, heatmap], dim=1)
+        # 在第三个维度上添加一个维度，使得最终的形状为(bs, num_kp+1, 1, d, h, w)
         heatmap = heatmap.unsqueeze(2)         # (bs, num_kp+1, 1, d, h, w)
         return heatmap
 
@@ -107,27 +120,32 @@ class DenseMotionNetwork(nn.Module):
         如果需要，通过卷积层 occlusion 计算遮挡图。
         """
         bs, _, d, h, w = feature.shape
-
+        # 通过 self.compress 方法对输入特征进行卷积压缩，
+        # 然后通过 self.norm 方法进行批归一化，最后应用了 ReLU 激活函数。
         feature = self.compress(feature)
         feature = self.norm(feature)
         feature = F.relu(feature)
 
+
+        #生成稀疏运动表示和变形特征。
         out_dict = dict()
         sparse_motion = self.create_sparse_motions(feature, kp_driving, kp_source)
         deformed_feature = self.create_deformed_feature(feature, sparse_motion)
 
+        # 生成了热图表示，描述了运动驱动关键点和源关键点之间的关系。
         heatmap = self.create_heatmap_representations(deformed_feature, kp_driving, kp_source)
 
+        # 这几行将热图表示和变形特征连接在一起，然后通过 Hourglass 模块处理，得到预测结果 prediction。
         input_ = torch.cat([heatmap, deformed_feature], dim=2)
         input_ = input_.view(bs, -1, d, h, w)
-
         # input = deformed_feature.view(bs, -1, d, h, w)      # (bs, num_kp+1 * c, d, h, w)
-
         prediction = self.hourglass(input_)
 
-
+        # 这两行通过卷积层 self.mask 处理 Hourglass 模块的输出，然后通过 softmax 操作生成遮罩 mask。
         mask = self.mask(prediction)
         mask = F.softmax(mask, dim=1)
+
+        # 到if之前的部分这对遮罩进行调整，然后利用遮罩对稀疏运动进行加权，计算最终的形变。
         out_dict['mask'] = mask
         mask = mask.unsqueeze(2)                                   # (bs, num_kp+1, 1, d, h, w)
         
@@ -139,7 +157,8 @@ class DenseMotionNetwork(nn.Module):
         deformation = deformation.permute(0, 2, 3, 4, 1)           # (bs, d, h, w, 3)
 
         out_dict['deformation'] = deformation
-
+        # 如果模型需要估计遮挡图（self.occlusion 不为 None），
+        # 则对 Hourglass 模块的输出进行处理，计算遮挡图，并存储在输出字典中。
         if self.occlusion:
             bs, c, d, h, w = prediction.shape
             prediction = prediction.view(bs, -1, h, w)
