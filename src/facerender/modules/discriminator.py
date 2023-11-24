@@ -1,16 +1,28 @@
 from torch import nn
 import torch.nn.functional as F
-from facerender.modules.util import kp2gaussian
+from src.facerender.modules.util import kp2gaussian
 import torch
-
+"""
+这段代码定义了一个基于 Pix2Pix 风格的鉴别器（Discriminator）以及一个多尺度的鉴别器（MultiScaleDiscriminator）
+"""
 
 class DownBlock2d(nn.Module):
     """
     Simple block for processing video (encoder).
+    这是一个简单的视频处理块（encoder）类，通常用于构建鉴别器的下采样部分。
     """
 
     def __init__(self, in_features, out_features, norm=False, kernel_size=4, pool=False, sn=False):
         super(DownBlock2d, self).__init__()
+        """
+        参数：
+        in_features：输入特征的通道数。
+        out_features：输出特征的通道数。
+        norm：是否使用 Instance Normalization 进行特征归一化。
+        kernel_size：卷积核的大小。
+        pool：是否进行平均池化。
+        sn：是否使用谱归一化（Spectral Normalization）。
+        """
         self.conv = nn.Conv2d(in_channels=in_features, out_channels=out_features, kernel_size=kernel_size)
 
         if sn:
@@ -36,11 +48,22 @@ class DownBlock2d(nn.Module):
 class Discriminator(nn.Module):
     """
     Discriminator similar to Pix2Pix
+    这是基于 Pix2Pix 风格的鉴别器类，包含了多个 DownBlock2d 模块。
     """
 
     def __init__(self, num_channels=3, block_expansion=64, num_blocks=4, max_features=512,
                  sn=False, **kwargs):
         super(Discriminator, self).__init__()
+        """
+        鉴别器由多个 DownBlock2d 模块组成，每个模块具有不同的通道数。
+        最后，通过卷积层产生一个通道的输出，用于生成对输入的判别结果。
+        参数：
+        num_channels：输入图像的通道数，默认为3（RGB）。
+        block_expansion：每个块的通道扩展系数。
+        num_blocks：鉴别器中包含的 DownBlock2d 模块数量。
+        max_features：鉴别器中最大的通道数。
+        sn：是否使用谱归一化。
+        """
 
         down_blocks = []
         for i in range(num_blocks):
@@ -69,10 +92,14 @@ class Discriminator(nn.Module):
 class MultiScaleDiscriminator(nn.Module):
     """
     Multi-scale (scale) discriminator
+    这是一个多尺度的鉴别器类，它包含了不同尺度的 Discriminator 模块。
     """
 
     def __init__(self, scales=(), **kwargs):
         super(MultiScaleDiscriminator, self).__init__()
+        """
+        scales：包含不同尺度的元组，用于指定每个尺度的 Discriminator 模块的配置。
+        """
         self.scales = scales
         discs = {}
         for scale in scales:
@@ -80,6 +107,10 @@ class MultiScaleDiscriminator(nn.Module):
         self.discs = nn.ModuleDict(discs)
 
     def forward(self, x):
+        """
+        目标是对多尺度的输入进行前向传播，通过每个尺度对应的鉴别器生成相应的特征图列表和判别结果映射，
+        并将这些结果以字典的形式返回。
+        """
         out_dict = {}
         for scale, disc in self.discs.items():
             scale = str(scale).replace('-', '.')
