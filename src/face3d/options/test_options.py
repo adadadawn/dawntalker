@@ -1,4 +1,6 @@
 """This script contains the test options for Deep3DFaceRecon_pytorch
+Deep3DFaceRecon_pytorch 项目中的测试选项配置脚本。与训练选项相似，
+测试选项定义了在测试模型时需要使用的各种参数，包括测试数据集的加载方式、测试图像的文件夹路径等。
 """
 
 from .base_options import BaseOptions

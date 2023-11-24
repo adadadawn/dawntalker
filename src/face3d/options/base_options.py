@@ -1,13 +1,15 @@
 """This script contains base options for Deep3DFaceRecon_pytorch
+这段代码是 Deep3DFaceRecon_pytorch 项目中的基础配置选项脚本。
+这个脚本定义了一个 BaseOptions 类，用于管理训练和测试过程中的各种配置选项。
 """
 
 import argparse
 import os
-from util import util
+from ..util import util
 import numpy as np
 import torch
-import face3d.models as models
-import face3d.data as data
+from .. import models as models
+from .. import data as data
 
 
 class BaseOptions():

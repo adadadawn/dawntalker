@@ -1,13 +1,17 @@
 """This script contains the training options for Deep3DFaceRecon_pytorch
+用于 Deep3DFaceRecon_pytorch 项目的训练选项配置脚本。训练选项定义了训练过程中使用的各种参数，
+包括数据集路径、批量大小、数据加载方式、数据增强选项、网络保存和加载参数、学习率等。
 """
 
 from .base_options import BaseOptions
-from util import util
+from ..util import util
 
 class TrainOptions(BaseOptions):
     """This class includes training options.
 
     It also includes shared options defined in BaseOptions.
+    该类继承自 BaseOptions 类。BaseOptions 类可能定义了一些通用的选项，
+    而 TrainOptions 在此基础上添加了一些与训练相关的选项
     """
 
     def initialize(self, parser):
