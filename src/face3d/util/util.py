@@ -80,10 +80,10 @@ def tensor2im(input_image, imtype=np.uint8):
         else:
             return input_image
         # 将张量中的值限制在指定范围内。在这里，它将张量中的值限制在 [0.0, 1.0] 的范围内。
-        # 任何小于0.0的值都将被设置为0.0，任何大于1.0的值都将被设置为1.0。
+        # clamp(0.0, 1.0) 任何小于0.0的值都将被设置为0.0，任何大于1.0的值都将被设置为1.0。
         image_numpy = image_tensor.clamp(0.0, 1.0).cpu().float().numpy()  # convert it into a numpy array
         if image_numpy.shape[0] == 1:  # grayscale to RGB
-            # 这个函数的目的是在不同维度上复制数组的内容，以扩展数组的尺寸。
+            # np.tile(image_numpy, (3, 1, 1))这个函数的目的是在不同维度上复制数组的内容，以扩展数组的尺寸。
             image_numpy = np.tile(image_numpy, (3, 1, 1))
         image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0  # post-processing: tranpose and scaling
     else:  # if it is a numpy array, do nothing
@@ -245,7 +245,8 @@ def draw_landmarks(img, landmark, color='r', step=2):
         x, y = landmark[:, i, 0], landmark[:, i, 1]
         for j in range(-step, step):
             for k in range(-step, step):
-                u = np.clip(x + j, 0, W - 1)
+                u = np.clip(x + j, 0, W - 1)  # 用于将数组 x + j 的值限制在指定的范围内。 ，这个表达式的含义是将 x + j 中的每个元素，
+                # 如果小于 0，则将其设置为 0，如果大于 W - 1，则将其设置为 W - 1。这样可以确保数组中的元素不会超出指定的范围。
                 v = np.clip(y + k, 0, H - 1)
                 for m in range(landmark.shape[0]):
                     img[m, v[m], u[m]] = c
