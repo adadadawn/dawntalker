@@ -117,6 +117,7 @@ def align_img(img, lm, lm3D, mask=None, target_size=224., rescale_factor=102.):
         lm5p = lm
 
     # calculate translation and scale factors using 5 facial landmarks and standard landmarks of a 3D face
+    # 使用 5 个人脸关键点（facial landmarks）和标准 3D 人脸关键点（standard landmarks of a 3D face）来计算平移和缩放因子
     t, s = POS(lm5p.transpose(), lm3D.transpose())
     s = rescale_factor/s
 
