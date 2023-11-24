@@ -14,6 +14,7 @@ index_url = os.environ.get('INDEX_URL', "")
 stored_commit_hash = None
 skip_install = False
 dir_repos = "repositories"
+# repo路径
 script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 if 'GRADIO_ANALYTICS_ENABLED' not in os.environ:
