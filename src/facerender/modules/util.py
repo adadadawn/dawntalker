@@ -12,6 +12,8 @@ import torch.nn.utils.spectral_norm as spectral_norm
 def kp2gaussian(kp, spatial_size, kp_variance):
     """
     Transform a keypoint into gaussian like representation
+    该函数将关键点转换为高斯样式的表示，其中高斯分布的均值由关键点位置确定。
+    使用坐标网格生成关键点的位置，然后计算高斯分布。
     """
     mean = kp['value']
 
@@ -32,6 +34,9 @@ def kp2gaussian(kp, spatial_size, kp_variance):
 
     return out
 
+
+# make_coordinate_grid_2d 和 make_coordinate_grid 函数:
+# 创建2D和3D坐标的网格，用于生成坐标信息。
 def make_coordinate_grid_2d(spatial_size, type):
     """
     Create a meshgrid [-1,1] x [-1,1] of given spatial_size.
@@ -69,8 +74,13 @@ def make_coordinate_grid(spatial_size, type):
 
     return meshed
 
-
+# ResBottleneck、ResBlock2d、ResBlock3d：分别是残差块的不同变体，用于处理2D和3D数据。
 class ResBottleneck(nn.Module):
+    """
+    该类表示瓶颈结构的残差块，通常用于处理维度较大的特征图。
+    包含三个卷积层，其中第一个是1x1卷积，降低输入特征图的维度（减小通道数），第二个是3x3卷积，最后一个是1x1卷积，升高输出特征图的维度。
+    使用批归一化和ReLU激活函数。
+    """
     def __init__(self, in_features, stride):
         super(ResBottleneck, self).__init__()
         self.conv1 = nn.Conv2d(in_channels=in_features, out_channels=in_features//4, kernel_size=1)
@@ -105,6 +115,8 @@ class ResBottleneck(nn.Module):
 class ResBlock2d(nn.Module):
     """
     Res block, preserve spatial resolution.
+    Res块，保留空间分辨率。
+    通过两个3x3卷积层、批归一化和激活函数的处理，最后的输出是与输入相同空间分辨率的特征图
     """
 
     def __init__(self, in_features, kernel_size, padding):
@@ -130,6 +142,7 @@ class ResBlock2d(nn.Module):
 class ResBlock3d(nn.Module):
     """
     Res block, preserve spatial resolution.
+    似于 ResBlock2d，通过两个3D卷积层、批归一化和激活函数的处理，最后的输出是与输入相同空间分辨率的3D特征图。
     """
 
     def __init__(self, in_features, kernel_size, padding):
@@ -174,6 +187,8 @@ class UpBlock2d(nn.Module):
 class UpBlock3d(nn.Module):
     """
     Upsampling block for use in decoder.
+     用于解码器（decoder）的3D上采样块。这个块的目的是通过上采样操作增加输入的体积（或深度）。
+     UpBlock3d 通过上采样操作实现了特征图的扩张，这对于解码器的任务（例如生成图像等）是非常重要的。
     """
 
     def __init__(self, in_features, out_features, kernel_size=3, padding=1, groups=1):
@@ -185,6 +200,11 @@ class UpBlock3d(nn.Module):
 
     def forward(self, x):
         # out = F.interpolate(x, scale_factor=(1, 2, 2), mode='trilinear')
+        """
+        forward 方法：在正向传播中，首先通过使用F.interpolate函数进行上采样，
+        这里的scale_factor=(1, 2, 2)表示在深度方向（第一个维度）上进行两倍的上采样。
+        然后，上采样后的结果经过3D卷积、批归一化和ReLU激活函数的处理。最后的输出是经过这一系列操作后的3D特征图。
+        """
         out = F.interpolate(x, scale_factor=(1, 2, 2))
         out = self.conv(out)
         out = self.norm(out)
@@ -192,9 +212,11 @@ class UpBlock3d(nn.Module):
         return out
 
 
+
 class DownBlock2d(nn.Module):
     """
     Downsampling block for use in encoder.
+    DownBlock2d 的作用是通过卷积和池化操作减小输入特征图的空间分辨率，这有助于在编码器中提取和学习更高级别的特征。
     """
 
     def __init__(self, in_features, out_features, kernel_size=3, padding=1, groups=1):
@@ -210,7 +232,6 @@ class DownBlock2d(nn.Module):
         out = F.relu(out)
         out = self.pool(out)
         return out
-
 
 class DownBlock3d(nn.Module):
     """
@@ -239,10 +260,20 @@ class DownBlock3d(nn.Module):
 class SameBlock2d(nn.Module):
     """
     Simple block, preserve spatial resolution.
+    SameBlock2d 主要用于在神经网络中执行一些基本的卷积、归一化和激活操作，同时保留输入特征图的空间分辨率。
     """
 
     def __init__(self, in_features, out_features, groups=1, kernel_size=3, padding=1, lrelu=False):
         super(SameBlock2d, self).__init__()
+        """
+        in_features：输入特征图的通道数。
+        out_features：输出特征图的通道数。
+        groups：卷积操作的组数，控制卷积的连接方式。
+        kernel_size：卷积核的大小。
+        padding：卷积操作的填充大小。
+        lrelu：一个布尔值，指定是否使用 LeakyReLU 激活函数。如果为 True，
+        则使用 LeakyReLU；如果为 False，则使用 ReLU。
+        """
         self.conv = nn.Conv2d(in_channels=in_features, out_channels=out_features,
                               kernel_size=kernel_size, padding=padding, groups=groups)
         self.norm = BatchNorm2d(out_features, affine=True)
@@ -261,11 +292,17 @@ class SameBlock2d(nn.Module):
 class Encoder(nn.Module):
     """
     Hourglass Encoder
+    该模型是一个 Hourglass 编码器。
     """
 
     def __init__(self, block_expansion, in_features, num_blocks=3, max_features=256):
         super(Encoder, self).__init__()
-
+        """
+        block_expansion：块（block）的扩展系数，指定了网络中特征图通道数的增长率。
+        in_features：输入特征图的通道数。
+        num_blocks：编码器中下采样块的数量，默认为 3。
+        max_features：最大特征通道数，默认为 256。
+        """
         down_blocks = []
         for i in range(num_blocks):
             down_blocks.append(DownBlock3d(in_features if i == 0 else min(max_features, block_expansion * (2 ** i)),
