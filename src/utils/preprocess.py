@@ -43,7 +43,8 @@ def split_coeff(coeffs):
         }
 
 
-class CropAndExtract():
+class CropAndExtract():#comments from dawn
+    # return coeff_path, png_path, crop_info 返回的是 参数路径 图片路径 图片剪裁后的参数
     def __init__(self, sadtalker_path, device):
 
         self.propress = Preprocesser(device)

@@ -20,17 +20,17 @@ class Predictor(BasePredictor):
 
         
         sadtalker_paths = init_path(checkpoints,os.path.join("src","config"))
-
+        #
         # init model
         self.preprocess_model = CropAndExtract(sadtalker_paths, device
-        )
+        )# 预处理模型
 
-        self.audio_to_coeff = Audio2Coeff(
+        self.audio_to_coeff = Audio2Coeff( # 语音系数
             sadtalker_paths,
             device,
         )
 
-        self.animate_from_coeff = {
+        self.animate_from_coeff = {# 动画系数
             "full": AnimateFromCoeff(
                 sadtalker_paths,
                 device,

@@ -2,7 +2,7 @@ import os
 import glob
 
 def init_path(checkpoint_dir, config_dir, size=512, old_version=False, preprocess='crop'):
-
+    #  训练参数文件加载
     if old_version:
         #### load all the checkpoint of `pth`
         sadtalker_paths = {
@@ -44,4 +44,4 @@ def init_path(checkpoint_dir, config_dir, size=512, old_version=False, preproces
         sadtalker_paths['mappingnet_checkpoint'] = os.path.join(checkpoint_dir, 'mapping_00229-model.pth.tar')
         sadtalker_paths['facerender_yaml'] = os.path.join(config_dir, 'facerender.yaml')
 
-    return sadtalker_paths
+    return sadtalker_paths# 返回的是训练网络参数路径和配置文件

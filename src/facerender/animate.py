@@ -30,13 +30,13 @@ try:
 except:
     in_webui = False
 
-class AnimateFromCoeff():
+class AnimateFromCoeff():#
 
     def __init__(self, sadtalker_path, device):
 
         with open(sadtalker_path['facerender_yaml']) as f:
             config = yaml.safe_load(f)
-
+        # 加载网络
         generator = OcclusionAwareSPADEGenerator(**config['model_params']['generator_params'],
                                                     **config['model_params']['common_params'])
         kp_extractor = KPDetector(**config['model_params']['kp_detector_params'],
@@ -58,7 +58,7 @@ class AnimateFromCoeff():
         for param in mapping.parameters():
             param.requires_grad = False
 
-        if sadtalker_path is not None:
+        if sadtalker_path is not None:#根据不同的sadtalker_path加载不同的关键点参数
             if 'checkpoint' in sadtalker_path: # use safe tensor
                 self.load_cpk_facevid2vid_safetensor(sadtalker_path['checkpoint'], kp_detector=kp_extractor, generator=generator, he_estimator=None)
             else:
@@ -110,7 +110,8 @@ class AnimateFromCoeff():
         
         return None
 
-    def load_cpk_facevid2vid(self, checkpoint_path, generator=None, discriminator=None, 
+    # 从指定的检查点文件中加载模型状态和优化器状态，以便在恢复模型训练或使用预训练模型时使用。
+    def load_cpk_facevid2vid(self, checkpoint_path, generator=None, discriminator=None,
                         kp_detector=None, he_estimator=None, optimizer_generator=None, 
                         optimizer_discriminator=None, optimizer_kp_detector=None, 
                         optimizer_he_estimator=None, device="cpu"):
