@@ -28,8 +28,10 @@ def main(args):
     ref_eyeblink = args.ref_eyeblink
     ref_pose = args.ref_pose
 
+# 得到当前脚本文件所在的目录路径。这种方式通常用于构建相对路径或获取当前脚本执行的位置
     current_root_path = os.path.split(sys.argv[0])[0]
 
+    # sadtalker_paths包含检查点路径
     sadtalker_paths = init_path(args.checkpoint_dir, os.path.join(current_root_path, 'src/config'), args.size, args.old_version, args.preprocess)
 
     #init model
