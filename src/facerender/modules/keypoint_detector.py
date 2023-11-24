@@ -9,11 +9,27 @@ from src.facerender.modules.util import KPHourglass, make_coordinate_grid, AntiA
 class KPDetector(nn.Module):
     """
     Detecting canonical keypoints. Return keypoint position and jacobian near each keypoint.
+    KPDetector 是关键点检测器模型，用于检测图像中的关键点位置及其雅克比矩阵。
     """
 
     def __init__(self, block_expansion, feature_channel, num_kp, image_channel, max_features, reshape_channel, reshape_depth,
                  num_blocks, temperature, estimate_jacobian=False, scale_factor=1, single_jacobian_map=False):
         super(KPDetector, self).__init__()
+        """
+        参数：
+        block_expansion: 沙漏网络中每个块的特征通道扩张因子。
+        feature_channel: 特征通道的维度。
+        num_kp: 要检测的关键点数量。
+        image_channel: 输入图像的通道数。
+        max_features: 沙漏网络中特征通道的最大数量。
+        reshape_channel: 沙漏网络中用于形状重塑的特征通道数。
+        reshape_depth: 沙漏网络中形状重塑的深度。
+        num_blocks: 沙漏网络中沙漏块的数量。
+        temperature: softmax 操作中的温度参数。
+        estimate_jacobian: 是否估计雅克比矩阵。
+        scale_factor: 输入图像的降采样因子。
+        single_jacobian_map: 是否只使用一个雅克比矩阵（对所有关键点共享一个）。
+        """
 
         self.predictor = KPHourglass(block_expansion, in_features=image_channel,
                                      max_features=max_features,  reshape_features=reshape_channel, reshape_depth=reshape_depth, num_blocks=num_blocks)
@@ -44,6 +60,7 @@ class KPDetector(nn.Module):
     def gaussian2kp(self, heatmap):
         """
         Extract the mean from a heatmap
+        从关键点热力图中提取均值的方法。返回一个字典，包含关键点均值的张量。
         """
         shape = heatmap.shape
         heatmap = heatmap.unsqueeze(-1)
@@ -54,6 +71,16 @@ class KPDetector(nn.Module):
         return kp
 
     def forward(self, x):
+        """
+        接收输入图像 x。
+        如果 scale_factor 不等于 1，对输入图像进行降采样。
+        通过沙漏网络 self.predictor 提取特征。
+        通过 self.kp 卷积层生成关键点热力图，并进行 softmax 操作。
+        调用 gaussian2kp 方法从热力图中提取关键点均值。
+        如果估计雅克比矩阵，通过 self.jacobian 卷积层生成雅克比矩阵，并与热力图相乘，最终得到雅克比矩阵。
+        返回一个包含关键点均值和雅克比矩阵（如果估计的话）的字典。
+        (关键点的位置和雅克比矩阵对于生成逼真的渲染效果至关重要。)
+        """
         if self.scale_factor != 1:
             x = self.down(x)
 
@@ -85,11 +112,25 @@ class KPDetector(nn.Module):
 class HEEstimator(nn.Module):
     """
     Estimating head pose and expression.
+    HEEstimator 是用于估计头部姿态和表情的模型。
     """
 
     def __init__(self, block_expansion, feature_channel, num_kp, image_channel, max_features, num_bins=66, estimate_jacobian=True):
         super(HEEstimator, self).__init__()
+        """
+        block_expansion: 一个整数，表示残差块的扩张系数。
+        feature_channel: 一个整数，表示输入图像的通道数。
+        num_kp: 一个整数，表示关键点的数量。
+        image_channel: 一个整数，表示输入图像的通道数。
+        max_features: 一个整数，表示最大的特征数。
+        num_bins: 一个整数，表示角度估计中分组的数量。
+        estimate_jacobian: 一个布尔值，表示是否要估计雅可比矩阵。
+        """
 
+        """
+        定义了一系列卷积层 (nn.Conv2d)、批归一化层 (BatchNorm2d) 以及残差块 (ResBottleneck)。
+        最后定义了几个全连接层 (nn.Linear) 用于输出头部姿态和表情的估计结果。
+        """
         self.conv1 = nn.Conv2d(in_channels=image_channel, out_channels=block_expansion, kernel_size=7, padding=3, stride=2)
         self.norm1 = BatchNorm2d(block_expansion, affine=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -134,6 +175,16 @@ class HEEstimator(nn.Module):
         self.fc_exp = nn.Linear(2048, 3*num_kp)
 
     def forward(self, x):
+        """
+        参数:
+        x: 输入图像。
+        操作:
+        对输入图像进行一系列的卷积、批归一化和残差块操作，形成特征表示。
+        对特征进行自适应平均池化，将其形状调整为(batch_size, 2048, 1, 1)。
+        将平坦的特征输入到全连接层中，得到头部姿态 (yaw, pitch, roll)、平移 (t) 和表情 (exp) 的估计结果。
+        返回一个字典，包含估计的头部姿态和表情。
+
+        """
         out = self.conv1(x)
         out = self.norm1(out)
         out = F.relu(out)
