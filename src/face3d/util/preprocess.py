@@ -98,6 +98,16 @@ def align_img(img, lm, lm3D, mask=None, target_size=224., rescale_factor=102.):
         lm                 --numpy.array  (68, 2), y direction is opposite to v direction
         lm3D               --numpy.array  (5, 3)
         mask               --PIL.Image  (raw_H, raw_W, 3)
+
+    transparams（numpy.array）： 包含以下五个值的 NumPy 数组：原始图像的宽度 raw_W、原始图像的高度 raw_H、缩放因子 scale、水平平移量 tx、垂直平移量 ty。这些参数描述了图像的缩放和平移信息。
+    img_new（PIL.Image）： 调整和裁剪后的图像，是一个 PIL 图像对象。其尺寸为 (target_size, target_size, 3)。
+    lm_new（numpy.array）： 包含 68 个关键点的二维坐标的 NumPy 数组。lm_new 的形状为 (68, 2)，其中每一行包含一个关键点的 x 和 y 坐标。
+    mask_new（PIL.Image）： 调整和裁剪后的掩码图像，是一个 PIL 图像对象。其尺寸为 (target_size, target_size)。
+
+    img（PIL.Image）： 原始的人脸图像，是一个 PIL 图像对象。其尺寸为 (raw_H, raw_W, 3)。
+    lm（numpy.array）： 包含 68 个关键点的二维坐标的 NumPy 数组。lm 的形状为 (68, 2)，其中每一行包含一个关键点的 x 和 y 坐标。在这里，“y 方向是与 v 方向相反”表示 y 坐标的方向可能是以图像底部为原点的，与常见的坐标系统相反。
+    lm3D（numpy.array）： 包含 5 个标准 3D 关键点的三维坐标的 NumPy 数组。lm3D 的形状为 (5, 3)，其中每一行包含一个关键点的 x、y 和 z 坐标。
+    mask（PIL.Image）： 原始的人脸掩码图像，是一个 PIL 图像对象。其尺寸为 (raw_H, raw_W, 3)。
     """
 
     w0, h0 = img.size
