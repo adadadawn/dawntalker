@@ -11,7 +11,9 @@
 import functools
 
 from torch.nn.parallel.data_parallel import DataParallel
-
+"""
+这份代码提供了一种用于执行分布式训练时模型参数同步的机制，主要使用了 DataParallel 类和一些辅助功能。
+"""
 __all__ = [
     'CallbackContext',
     'execute_replication_callbacks',

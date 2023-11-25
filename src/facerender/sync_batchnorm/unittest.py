@@ -12,7 +12,17 @@ import unittest
 
 import numpy as np
 from torch.autograd import Variable
+"""
+这份代码是一个用于进行 PyTorch 单元测试的辅助工具，主要包含以下内容：
+as_numpy 函数：将 PyTorch 的张量（Tensor）或变量（Variable）转换为 NumPy 数组。
+    如果输入是 Variable，则提取其数据部分。
+TorchTestCase 类：继承自 unittest.TestCase，用于编写 PyTorch 单元测试的基类。
+    包含了一个用于比较两个张量是否在一定误差范围内接近的辅助函数 assertTensorClose。
+assertTensorClose 方法：用于断言两个张量在给定的绝对误差 (atol) 和相对误差 (rtol) 范围内是相似的。
+    如果两个张量的差异超过了指定的误差范围，将引发断言错误，并显示相关信息，包括差异、相对差异等。
 
+
+"""
 
 def as_numpy(v):
     if isinstance(v, Variable):

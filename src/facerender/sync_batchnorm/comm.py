@@ -14,7 +14,9 @@ import threading
 
 __all__ = ['FutureResult', 'SlavePipe', 'SyncMaster']
 
-
+"""
+这份代码定义了一种用于在分布式训练中进行主从通信的机制,
+"""
 class FutureResult(object):
     """A thread-safe future implementation. Used only as one-to-one pipe."""
 

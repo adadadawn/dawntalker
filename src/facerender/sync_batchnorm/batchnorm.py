@@ -18,6 +18,11 @@ from torch.nn.parallel._functions import ReduceAddCoalesced, Broadcast
 
 from .comm import SyncMaster
 
+"""
+这份代码是Synchronized-BatchNorm-PyTorch项目的一部分，它实现了同步批归一化（Synchronized Batch Normalization）层。
+这种批归一化的特殊之处在于，在分布式训练中，它通过跨多个设备同步计算统计量，而不是每个设备上独立计算，
+以提高统计量的准确性。
+"""
 __all__ = ['SynchronizedBatchNorm1d', 'SynchronizedBatchNorm2d', 'SynchronizedBatchNorm3d']
 
 
