@@ -3,7 +3,7 @@ import cv2
 import yaml
 import numpy as np
 import warnings
-from skimage import img_as_ubyte
+from skimage.util import img_as_ubyte
 import safetensors
 import safetensors.torch 
 warnings.filterwarnings('ignore')
