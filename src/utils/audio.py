@@ -7,6 +7,12 @@ from scipy.io import wavfile
 from src.utils.hparams import hparams as hp
 
 def load_wav(path, sr):
+    """
+    读取音频
+    :param path: 音频路径
+    :param sr: 采样率
+    :return: 它返回一个包含音频样本的一维 NumPy 数组。这个数组表示了整个音频信号的波形
+    """
     return librosa.core.load(path, sr=sr)[0]
 
 def save_wav(wav, path, sr):
