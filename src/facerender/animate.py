@@ -95,7 +95,8 @@ class AnimateFromCoeff():#
 
     def load_cpk_facevid2vid_safetensor(self, checkpoint_path, generator=None, 
                         kp_detector=None, he_estimator=None,  
-                        device="cpu"):
+                        device ="cpu"):
+
         """
         用于从安全张量（safetensor）格式的checkpoint文件中加载权重到模型中。
         :param checkpoint_path: 表示模型的checkpoint文件的路径。
@@ -134,9 +135,9 @@ class AnimateFromCoeff():#
                         optimizer_he_estimator=None, device="cpu"):
         """
         从指定的检查点文件中加载模型状态和优化器状态，以便在恢复模型训练或使用预训练模型时使用。
-        :param checkpoint_path:
-        :param generator:
-        :param discriminator:
+        :param checkpoint_path: 关键点的路径
+        :param generator:  生成器的路径
+        :param discriminator:  辨别器的实例
         :param kp_detector:
         :param he_estimator:
         :param optimizer_generator:
