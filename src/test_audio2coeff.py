@@ -92,7 +92,7 @@ class Audio2Coeff():
             #for class_id in  range(1):
             #class_id = 0#(i+10)%45
             #class_id = random.randint(0,46)                                   #46 styles can be selected 
-            batch['class'] = torch.LongTensor([pose_style]).to(self.device)
+            batch['class'] = torch.LongTensor([pose_style]).to(self.device)  # pose_style default 0
             results_dict_pose = self.audio2pose_model.test(batch) 
             pose_pred = results_dict_pose['pose_pred']                        #bs T 6
 

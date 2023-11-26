@@ -49,7 +49,7 @@ class Audio2Pose(nn.Module):
 
         batch = {}
         ref = x['ref']                            #bs 1 70
-        batch['ref'] = x['ref'][:,0,-6:]  
+        batch['ref'] = x['ref'][:,0,-6:]  # pose  bs,6
         batch['class'] = x['class']  
         bs = ref.shape[0]
         
@@ -58,7 +58,7 @@ class Audio2Pose(nn.Module):
         num_frames = x['num_frames']
         num_frames = int(num_frames) - 1
 
-        #  
+        #  分段处理
         div = num_frames//self.seq_len
         re = num_frames%self.seq_len
         audio_emb_list = []
@@ -86,8 +86,8 @@ class Audio2Pose(nn.Module):
             pose_motion_pred_list.append(batch['pose_motion_pred'][:,-1*re:,:])   
         
         pose_motion_pred = torch.cat(pose_motion_pred_list, dim = 1)
-        batch['pose_motion_pred'] = pose_motion_pred
-
+        batch['pose_motion_pred'] = pose_motion_pred   #bs T-1 6
+        # ref[:, :1, -6:] 第一帧的pose 加上后面T-1帧
         pose_pred = ref[:, :1, -6:] + pose_motion_pred  # bs T 6
 
         batch['pose_pred'] = pose_pred
