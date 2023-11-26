@@ -88,7 +88,7 @@ def extract_5p(lm):
 def align_img(img, lm, lm3D, mask=None, target_size=224., rescale_factor=102.):
     """
     Return:
-        transparams        --numpy.array  (raw_W, raw_H, scale, tx, ty)
+        transparams        --numpy.array  (raw_W, raw_H, scale, tx, ty) tx,ty平移向量，裁剪前的
         img_new            --PIL.Image  (target_size, target_size, 3)
         lm_new             --numpy.array  (68, 2), y direction is opposite to v direction
         mask_new           --PIL.Image  (target_size, target_size)

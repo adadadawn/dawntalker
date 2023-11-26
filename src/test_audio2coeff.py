@@ -79,7 +79,7 @@ class Audio2Coeff():
 
         :param batch:
         :param coeff_save_dir:
-        :param pose_style:
+        :param pose_style:姿势风格序号
         :param ref_pose_coeff_path:
         :return: 生成的 3DMM 参数保存的文件路径
         """
@@ -105,7 +105,7 @@ class Audio2Coeff():
             
             coeffs_pred = torch.cat((exp_pred, pose_pred), dim=-1)            #bs T 70
 
-            coeffs_pred_numpy = coeffs_pred[0].clone().detach().cpu().numpy() 
+            coeffs_pred_numpy = coeffs_pred[0].clone().detach().cpu().numpy()  # T 70
 
             if ref_pose_coeff_path is not None: 
                  coeffs_pred_numpy = self.using_refpose(coeffs_pred_numpy, ref_pose_coeff_path)
@@ -116,6 +116,8 @@ class Audio2Coeff():
             return os.path.join(coeff_save_dir, '%s##%s.mat'%(batch['pic_name'], batch['audio_name']))
     
     def using_refpose(self, coeffs_pred_numpy, ref_pose_coeff_path):
+        # coeffs_pred_numpy音频预测的数据
+        #  ref_pose_coeff_path 视频生成的数据
         num_frames = coeffs_pred_numpy.shape[0]
         refpose_coeff_dict = loadmat(ref_pose_coeff_path)
         refpose_coeff = refpose_coeff_dict['coeff_3dmm'][:,64:70]

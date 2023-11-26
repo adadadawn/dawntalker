@@ -141,6 +141,7 @@ class DECODER(nn.Module):
 
         z = batch['z']                                          #bs latent_size
         bs = z.shape[0]
+        # pose_style
         class_id = batch['class']
         ref = batch['ref']                             #bs 6
         audio_in = batch['audio_emb']                           # bs seq_len audio_emb_in_size

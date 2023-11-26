@@ -45,6 +45,7 @@ def main(args):
     first_frame_dir = os.path.join(save_dir, 'first_frame_dir')
     os.makedirs(first_frame_dir, exist_ok=True)
     print('3DMM Extraction for source image')
+    # first_coeff_path 源图像系数保存路径
     first_coeff_path, crop_pic_path, crop_info =  preprocess_model.generate(pic_path, first_frame_dir, args.preprocess,\
                                                                              source_image_flag=True, pic_size=args.size)
     if first_coeff_path is None:
@@ -75,7 +76,7 @@ def main(args):
     #audio2ceoff
     # 将数据打包
     batch = get_data(first_coeff_path, audio_path, device, ref_eyeblink_coeff_path, still=args.still)
-    # 输出表情系数以及姿势系数一起保存的路径
+    # 输出表情系数以及姿势系数一起保存的路径  #[T,70]
     coeff_path = audio_to_coeff.generate(batch, save_dir, pose_style, ref_pose_coeff_path)
 
     # 3dface render

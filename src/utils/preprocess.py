@@ -75,7 +75,9 @@ class CropAndExtract():#comments from dawn
         :param crop_or_resize:裁剪或调整大小模式
         :param source_image_flag:是否是源图像
         :param pic_size:图片大小
-        :return:
+        :return:coeff_path, 存储生成的3DMM参数的文件路径。 [fps coeffs_length]
+        png_path, 存储处理后的图像的文件路径。
+        crop_info 存储剪裁后的图像框的对角坐标的文件路径。
         """
         # 提取图像的文件名，并构建保存提取信息的文件路径。
         # 从输入路径中提取图像文件名，去掉扩展名
@@ -194,7 +196,7 @@ class CropAndExtract():#comments from dawn
                     pred_coeff['exp'],  # 64
                     pred_coeff['angle'], # 3
                     pred_coeff['trans'], # 3 tx, ty，tz
-                    trans_params[2:][None], # scale, tx, ty
+                    trans_params[2:][None], # scale, tx, ty 二维的
                     ], 1)   #（1,length）
                 video_coeffs.append(pred_coeff)
                 full_coeffs.append(full_coeff.cpu().numpy())
