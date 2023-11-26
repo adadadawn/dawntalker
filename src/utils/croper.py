@@ -22,6 +22,7 @@ class Preprocesser:
 
     def get_landmark(self, img_np):
         """get landmark with dlib
+        通过人脸检测，获取输入图像的人脸关键点坐标
         :return: np.array shape=(68, 2)
         """
         with torch.no_grad():
@@ -42,8 +43,13 @@ class Preprocesser:
 
     def align_face(self, img, lm, output_size=1024):
         """
+        根据输入的图像和关键点坐标进行人脸对齐操作。
+        该方法计算了眼睛和嘴巴的位置，选择合适的裁剪区域，然后进行裁剪和缩放操作，最终返回对齐后的人脸图像。
         :param filepath: str
-        :return: PIL Image
+        :return: PIL Image resize:缩小后的图片的大小 crop:一个包含四个元素的元组，表示裁剪区域的边界框。
+        元组的四个元素分别是左上角点的 x 和 y 坐标，以及右下角点的 x 和 y 坐标。
+        [lx, ly, rx, ry]：一个包含四个元素的列表，表示对齐后的人脸在原始图像中的位置。
+        列表的四个元素分别是左上角点的 x 和 y 坐标，以及右下角点的 x 和 y 坐标。
         """
         lm_chin = lm[0: 17]  # left-right
         lm_eyebrow_left = lm[17: 22]  # left-right
@@ -124,6 +130,15 @@ class Preprocesser:
         return rsize, crop, [lx, ly, rx, ry]
     
     def crop(self, img_np_list, still=False, xsize=512):    # first frame for all video
+        """
+
+        :param img_np_list:一个包含多帧图像的列表，表示视频中的每一帧图像。
+        :param still:是否通crop的坐标或者quad的坐标
+        :param xsize:一个整数，表示输出图像的大小。对于缩小后的图像，其大小将被调整为 (xsize, xsize)
+        :return:img_np_list：经过裁剪和缩放后的图像列表，这是一个包含多帧图像的列表.
+        crop：一个包含四个元素的元组，表示裁剪区域的边界框。元组的四个元素分别是左上角点的 x 和 y 坐标，以及右下角点的 x 和 y 坐标。
+        quad：一个包含四个元素的列表，表示对齐后的人脸在原始图像中的位置。列表的四个元素分别是左上角点的 x 和 y 坐标，以及右下角点的 x 和 y 坐标。
+        """
         img_np = img_np_list[0]
         lm = self.get_landmark(img_np)
 

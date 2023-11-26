@@ -47,6 +47,13 @@ class KeypointExtractor():
         self.det_net = init_detection_model('retinaface_resnet50', half=False,device=device, model_rootpath=root_path)
 
     def extract_keypoint(self, images, name=None, info=True):
+        """
+
+        :param images:
+        :param name:
+        :param info:
+        :return: 68个二维点
+        """
         if isinstance(images, list):
             keypoints = []
             if info:
@@ -75,7 +82,7 @@ class KeypointExtractor():
                         
                         bboxes = bboxes[0]
                         img = img[int(bboxes[1]):int(bboxes[3]), int(bboxes[0]):int(bboxes[2]), :]
-
+                        # 变为68个点
                         keypoints = landmark_98_to_68(self.detector.get_landmarks(img)) # [0]
 
                         #### keypoints to the original location

@@ -34,14 +34,14 @@ def main(args):
     # sadtalker_paths包含检查点路径
     sadtalker_paths = init_path(args.checkpoint_dir, os.path.join(current_root_path, 'src/config'), args.size, args.old_version, args.preprocess)
 
-    #init model
+    # init model
     preprocess_model = CropAndExtract(sadtalker_paths, device)
 
     audio_to_coeff = Audio2Coeff(sadtalker_paths,  device)
     
     animate_from_coeff = AnimateFromCoeff(sadtalker_paths, device)
 
-    #crop image and extract 3dmm from image
+    # crop image and extract 3dmm from image
     first_frame_dir = os.path.join(save_dir, 'first_frame_dir')
     os.makedirs(first_frame_dir, exist_ok=True)
     print('3DMM Extraction for source image')
@@ -81,7 +81,7 @@ def main(args):
         from src.face3d.visualize import gen_composed_video
         gen_composed_video(args, device, first_coeff_path, coeff_path, audio_path, os.path.join(save_dir, '3dface.mp4'))
     
-    #coeff2video
+    # coeff2video
     data = get_facerender_data(coeff_path, crop_pic_path, first_coeff_path, audio_path, 
                                 batch_size, input_yaw_list, input_pitch_list, input_roll_list,
                                 expression_scale=args.expression_scale, still_mode=args.still, preprocess=args.preprocess, size=args.size)
