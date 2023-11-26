@@ -123,7 +123,7 @@ class DECODER(nn.Module):
         self.seq_len = seq_len
 
         self.MLP = nn.Sequential()
-        input_size = latent_size + seq_len*audio_emb_out_size + 6
+        input_size = latent_size + seq_len*audio_emb_out_size + 6 # 6为源图像的特征
         for i, (in_size, out_size) in enumerate(zip([input_size]+layer_sizes[:-1], layer_sizes)):
             self.MLP.add_module(
                 name="L{:d}".format(i), module=nn.Linear(in_size, out_size))

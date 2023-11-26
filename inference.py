@@ -73,7 +73,9 @@ def main(args):
         ref_pose_coeff_path=None
 
     #audio2ceoff
+    # 将数据打包
     batch = get_data(first_coeff_path, audio_path, device, ref_eyeblink_coeff_path, still=args.still)
+    # 输出表情系数以及姿势系数一起保存的路径
     coeff_path = audio_to_coeff.generate(batch, save_dir, pose_style, ref_pose_coeff_path)
 
     # 3dface render
@@ -82,6 +84,7 @@ def main(args):
         gen_composed_video(args, device, first_coeff_path, coeff_path, audio_path, os.path.join(save_dir, '3dface.mp4'))
     
     # coeff2video
+    # 将数据打包
     data = get_facerender_data(coeff_path, crop_pic_path, first_coeff_path, audio_path, 
                                 batch_size, input_yaw_list, input_pitch_list, input_roll_list,
                                 expression_scale=args.expression_scale, still_mode=args.still, preprocess=args.preprocess, size=args.size)
