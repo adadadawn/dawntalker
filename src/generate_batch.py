@@ -112,9 +112,9 @@ def get_data(first_coeff_path, audio_path, device, ref_eyeblink_coeff_path, stil
     ratio = ratio.to(device)
     ref_coeff = ref_coeff.to(device)
 
-    return {'indiv_mels': indiv_mels,  
-            'ref': ref_coeff, 
-            'num_frames': num_frames, 
-            'ratio_gt': ratio,
+    return {'indiv_mels': indiv_mels,  # 形状为 (bs, T, 1, 80, 16) 的 PyTorch 张量，表示音频的梅尔频谱图序列，其中 bs 为批次大小，T 为序列长度。
+            'ref': ref_coeff, # 形状为 (bs, 1, 70) 的 PyTorch 张量，表示参考的 3DMM 参数序列，
+            'num_frames': num_frames,
+            'ratio_gt': ratio, # 形状为 (bs, T) 的 PyTorch 张量，表示眨眼比例的真实值，bs 为批次大小，T 为序列长度
             'audio_name': audio_name, 'pic_name': pic_name}
 

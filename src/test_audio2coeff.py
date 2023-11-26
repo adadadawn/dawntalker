@@ -26,6 +26,8 @@ class Audio2Coeff():
 
     def __init__(self, sadtalker_path, device):
         #load config
+        # 打开 audio2pose 和 audio2exp 的配置文件，加载配置信息。
+
         fcfg_pose = open(sadtalker_path['audio2pose_yaml_path'])
         cfg_pose = CN.load_cfg(fcfg_pose)
         cfg_pose.freeze()
@@ -34,6 +36,7 @@ class Audio2Coeff():
         cfg_exp.freeze()
 
         # load audio2pose_model
+        #
         self.audio2pose_model = Audio2Pose(cfg_pose, None, device=device)
         self.audio2pose_model = self.audio2pose_model.to(device)
         self.audio2pose_model.eval()
@@ -72,8 +75,16 @@ class Audio2Coeff():
         self.device = device
 
     def generate(self, batch, coeff_save_dir, pose_style, ref_pose_coeff_path=None):
+        """
 
+        :param batch:
+        :param coeff_save_dir:
+        :param pose_style:
+        :param ref_pose_coeff_path:
+        :return: 生成的 3DMM 参数保存的文件路径
+        """
         with torch.no_grad():
+
             #test
             results_dict_exp= self.audio2exp_model.test(batch)
             exp_pred = results_dict_exp['exp_coeff_pred']                         #bs T 64
