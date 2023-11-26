@@ -39,7 +39,7 @@ def split_coeff(coeffs):
             'tex': tex_coeffs,
             'angle': angles,
             'gamma': gammas,
-            'trans': translations
+            'trans': translations # 3
         }
 
 
@@ -191,9 +191,9 @@ class CropAndExtract():#comments from dawn
                 pred_coeff = {key:coeffs[key].cpu().numpy() for key in coeffs}
  
                 pred_coeff = np.concatenate([
-                    pred_coeff['exp'], 
-                    pred_coeff['angle'],
-                    pred_coeff['trans'],
+                    pred_coeff['exp'],  # 64
+                    pred_coeff['angle'], # 3
+                    pred_coeff['trans'], # 3 tx, ty，tz
                     trans_params[2:][None], # scale, tx, ty
                     ], 1)   #（1,length）
                 video_coeffs.append(pred_coeff)

@@ -29,6 +29,7 @@ class Conv2d(nn.Module):
         else:
             return out
 
+# wav2lip的音频编码器
 class SimpleWrapperV2(nn.Module):
     def __init__(self) -> None:
         super().__init__()

@@ -49,7 +49,23 @@ def generate_blink_seq_randomly(num_frames):
     return ratio
 
 def get_data(first_coeff_path, audio_path, device, ref_eyeblink_coeff_path, still=False, idlemode=False, length_of_audio=False, use_blink=True):
+    """
 
+    :param first_coeff_path:
+    :param audio_path:
+    :param device:
+    :param ref_eyeblink_coeff_path:
+    :param still:
+    :param idlemode:
+    :param length_of_audio:
+    :param use_blink:
+    :return: indiv_mels': indiv_mels,  # 形状为 (bs, T, 1, 80, 16) 的 PyTorch 张量，表示音频的梅尔频谱图序列，其中 bs 为批次大小，T 为序列长度。
+            'ref': ref_coeff, # 形状为 (bs, 1, 70) 的 PyTorch 张量，表示参考的 3DMM 参数序列，（原图像）
+            'num_frames': num_frames, # 音频帧数
+            'ratio_gt': ratio, # 形状为 (bs, T) 的 PyTorch 张量，表示眨眼比例的真实值，bs 为批次大小，T 为序列长度
+            'audio_name': audio_name,
+            'pic_name': pic_name
+    """
     syncnet_mel_step_size = 16
     fps = 25
 
@@ -60,6 +76,7 @@ def get_data(first_coeff_path, audio_path, device, ref_eyeblink_coeff_path, stil
     if idlemode:
         num_frames = int(length_of_audio * 25)
         indiv_mels = np.zeros((num_frames, 80, 16))
+    # 如果不是 idlemode，读取音频文件，计算 wav_length 和 num_frames，然后对音频进行裁剪或填充。
     else:
         wav = audio.load_wav(audio_path, 16000) 
         wav_length, num_frames = parse_audio_length(len(wav), 16000, 25)
@@ -67,7 +84,7 @@ def get_data(first_coeff_path, audio_path, device, ref_eyeblink_coeff_path, stil
         orig_mel = audio.melspectrogram(wav).T
         spec = orig_mel.copy()         # nframes 80
         indiv_mels = []
-
+    # 通过 audio.melspectrogram 计算音频的梅尔频谱图，然后对其进行处理得到 indiv_mels。
         for i in tqdm(range(num_frames), 'mel:'):
             start_frame_num = i-2
             start_idx = int(80. * (start_frame_num / float(fps)))
@@ -77,12 +94,14 @@ def get_data(first_coeff_path, audio_path, device, ref_eyeblink_coeff_path, stil
             m = spec[seq, :]
             indiv_mels.append(m.T)
         indiv_mels = np.asarray(indiv_mels)         # T 80 16
-
+    # 调用 generate_blink_seq_randomly 生成一个长度为 num_frames 的眨眼比例序列 ratio。
     ratio = generate_blink_seq_randomly(num_frames)      # T
     source_semantics_path = first_coeff_path
     source_semantics_dict = scio.loadmat(source_semantics_path)
-    ref_coeff = source_semantics_dict['coeff_3dmm'][:1,:70]         #1 70
-    ref_coeff = np.repeat(ref_coeff, num_frames, axis=0)
+    # 原图像的3dmm系数
+    ref_coeff = source_semantics_dict['coeff_3dmm'][:1,:70]         # 1 70 exp angle tx, ty，tz
+    # 重复到帧数
+    ref_coeff = np.repeat(ref_coeff, num_frames, axis=0) # bs 70
 
     if ref_eyeblink_coeff_path is not None:
         ratio[:num_frames] = 0
@@ -113,8 +132,8 @@ def get_data(first_coeff_path, audio_path, device, ref_eyeblink_coeff_path, stil
     ref_coeff = ref_coeff.to(device)
 
     return {'indiv_mels': indiv_mels,  # 形状为 (bs, T, 1, 80, 16) 的 PyTorch 张量，表示音频的梅尔频谱图序列，其中 bs 为批次大小，T 为序列长度。
-            'ref': ref_coeff, # 形状为 (bs, 1, 70) 的 PyTorch 张量，表示参考的 3DMM 参数序列，
-            'num_frames': num_frames,
+            'ref': ref_coeff, # 形状为 (bs, 1, 70) 的 PyTorch 张量，表示参考的 3DMM 参数序列，（原图像）
+            'num_frames': num_frames, # 音频帧数
             'ratio_gt': ratio, # 形状为 (bs, T) 的 PyTorch 张量，表示眨眼比例的真实值，bs 为批次大小，T 为序列长度
             'audio_name': audio_name, 'pic_name': pic_name}
 

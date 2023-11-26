@@ -29,8 +29,8 @@ class CVAE(nn.Module):
                                 audio_emb_in_size, audio_emb_out_size, seq_len)
 
     
-#这段代码实现了重参数化技巧，通常在变分自编码器（Variational Autoencoder，VAE）中使用。
-#VAE是生成模型，以概率方式学习对数据进行编码和解码。重参数化技巧用于通过采样过程传播梯度，从而可以使用基于梯度的优化方法训练模型。
+    # 这段代码实现了重参数化技巧，通常在变分自编码器（Variational Autoencoder，VAE）中使用。
+    # VAE是生成模型，以概率方式学习对数据进行编码和解码。重参数化技巧用于通过采样过程传播梯度，从而可以使用基于梯度的优化方法训练模型。
     def reparameterize(self, mu, logvar):
         std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
